@@ -1,7 +1,12 @@
 import type { Server } from "node:http";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import express, { type NextFunction, type Request, type Response } from "express";
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import type { OpenMessageClient } from "../client/openmessage-client.js";
 import { registerOpenMessageTools } from "./tools.js";
 
@@ -21,7 +26,7 @@ export function createMcpServer(client: OpenMessageClient): McpServer {
 export function createMcpHttpApp(
   client: OpenMessageClient,
   options: { bearerToken?: string } = {},
-) {
+): Express {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
   app.get("/health", (_request, response) => {
