@@ -61,6 +61,7 @@ The stateless Streamable HTTP server exposes exactly two tools:
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:integration
 pnpm build
 pnpm smoke
 pnpm pack:verify
@@ -68,5 +69,18 @@ pnpm pack:verify
 pnpm verify
 ```
 
-The E2E test starts a real mock OpenMessage HTTP service, starts the Streamable HTTP MCP server,
-sends a message through MCP, then reads the persisted message through `get_interaction`.
+The integration test in `test/integration` starts an in-process OpenMessage HTTP stub and the
+real Streamable HTTP MCP transport. It is intentionally not described as an end-to-end test.
+
+The no-mock test in `test/e2e/real-openmessage.test.ts` requires all three variables below:
+
+| Variable | Purpose |
+| --- | --- |
+| `OPENMESSAGE_E2E_BASE_URL` | Reachable OpenMessage test API |
+| `OPENMESSAGE_E2E_API_KEY` | Test-environment upstream bearer token |
+| `OPENMESSAGE_E2E_DESTINATION` | Test destination accepted by that environment |
+
+Run it with `pnpm test:e2e:real`. The test starts only the local MCP adapter; all
+`send_message` and `get_interaction` persistence calls go to the configured real OpenMessage
+service with no upstream mock or stub. Normal test runs skip this suite when any required variable
+is absent. CI logs a visible notice in that case rather than reporting a fake E2E pass.

@@ -12,15 +12,15 @@ afterEach(async () => {
   await Promise.all(closeCallbacks.splice(0).map((close) => close()));
 });
 
-describe("Streamable HTTP MCP", () => {
-  it("lists only two tools, sends, then reads the persisted message", async () => {
+describe("Streamable HTTP MCP integration", () => {
+  it("lists only two tools, sends, then reads through an in-process upstream stub", async () => {
     const interactions = new Map<string, { messageId: string; position: string }[]>();
     const messages = new Map<string, Record<string, unknown>>();
     const upstream = express();
     upstream.use(express.json());
     upstream.post("/v1/messages", (request, response) => {
-      const interactionId = request.body.interactionId ?? "int-e2e";
-      const messageId = "msg-e2e";
+      const interactionId = request.body.interactionId ?? "int-integration";
+      const messageId = "msg-integration";
       interactions.set(interactionId, [{ messageId, position: "0001" }]);
       messages.set(messageId, { messageId, ...request.body.message });
       response.status(202).json({ interactionId, messageId });
@@ -44,7 +44,7 @@ describe("Streamable HTTP MCP", () => {
     const running = await startMcpHttpServer({
       client: new OpenMessageClient({
         baseUrl: `http://127.0.0.1:${upstreamAddress.port}`,
-        origin: "e2e-agent",
+        origin: "integration-agent",
       }),
       host: "127.0.0.1",
       port: 0,
@@ -52,7 +52,7 @@ describe("Streamable HTTP MCP", () => {
     });
     closeCallbacks.push(running.close);
 
-    const client = new Client({ name: "e2e-client", version: "1.0.0" });
+    const client = new Client({ name: "integration-client", version: "1.0.0" });
     const transport = new StreamableHTTPClientTransport(
       new URL(`http://127.0.0.1:${running.port}/mcp`),
       { requestInit: { headers: { authorization: "Bearer mcp-token" } } },
@@ -67,20 +67,20 @@ describe("Streamable HTTP MCP", () => {
       arguments: { destination: "agent:bob", content: "persist me" },
     });
     expect(sent.structuredContent).toEqual({
-      messageId: "msg-e2e",
-      interactionId: "int-e2e",
+      messageId: "msg-integration",
+      interactionId: "int-integration",
       accepted: true,
     });
     const interaction = await client.callTool({
       name: "get_interaction",
-      arguments: { interactionId: "int-e2e" },
+      arguments: { interactionId: "int-integration" },
     });
     expect(interaction.structuredContent).toEqual({
-      interactionId: "int-e2e",
+      interactionId: "int-integration",
       messages: [
         {
-          messageId: "msg-e2e",
-          origin: "e2e-agent",
+          messageId: "msg-integration",
+          origin: "integration-agent",
           destination: "agent:bob",
           content: "persist me",
           position: "0001",

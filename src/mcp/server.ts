@@ -13,7 +13,7 @@ export interface McpHttpServerOptions {
 }
 
 export function createMcpServer(client: OpenMessageClient): McpServer {
-  const server = new McpServer({ name: "openmessage", version: "0.2.0" });
+  const server = new McpServer({ name: "openmessage", version: "0.2.1" });
   registerOpenMessageTools(server, client);
   return server;
 }

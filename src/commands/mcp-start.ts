@@ -7,6 +7,35 @@ interface McpStartOptions {
   port: string;
 }
 
+interface RunningMcpServer {
+  close: () => Promise<void>;
+}
+
+export function createShutdownHandler(
+  running: RunningMcpServer,
+  writeError: (message: string) => void = (message) => process.stderr.write(message),
+): (signal: string) => Promise<void> {
+  let shutdown: Promise<void> | undefined;
+  return (signal: string) => {
+    if (shutdown) return shutdown;
+    writeError(`Received ${signal}; shutting down OpenMessage MCP\n`);
+    shutdown = running
+      .close()
+      .then(() => {
+        process.exitCode = 0;
+      })
+      .catch((error: unknown) => {
+        writeError(
+          `OpenMessage MCP shutdown failed: ${
+            error instanceof Error ? error.message : String(error)
+          }\n`,
+        );
+        process.exitCode = 1;
+      });
+    return shutdown;
+  };
+}
+
 export function registerMcpCommand(
   program: Command,
   client: OpenMessageClient,
@@ -32,11 +61,7 @@ export function registerMcpCommand(
       process.stderr.write(
         `OpenMessage MCP listening at http://${options.host}:${running.port}/mcp\n`,
       );
-      const shutdown = async (signal: string) => {
-        process.stderr.write(`Received ${signal}; shutting down OpenMessage MCP\n`);
-        await running.close();
-        process.exitCode = 0;
-      };
+      const shutdown = createShutdownHandler(running);
       process.once("SIGINT", () => void shutdown("SIGINT"));
       process.once("SIGTERM", () => void shutdown("SIGTERM"));
     });

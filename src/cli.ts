@@ -10,7 +10,7 @@ export function createProgram(environment: NodeJS.ProcessEnv = process.env): Com
   const program = new Command()
     .name("openmessage")
     .description("OpenMessage CLI and Streamable HTTP MCP server")
-    .version("0.2.0");
+    .version("0.2.1");
   registerSendCommand(program, client);
   registerInteractionCommands(program, client);
   registerMcpCommand(program, client, {
