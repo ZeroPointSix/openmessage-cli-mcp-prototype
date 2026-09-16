@@ -22,7 +22,11 @@ describe("Streamable HTTP MCP integration", () => {
       const interactionId = request.body.interactionId ?? "int-integration";
       const messageId = "msg-integration";
       interactions.set(interactionId, [{ messageId, position: "0001" }]);
-      messages.set(messageId, { messageId, ...request.body.message });
+      messages.set(messageId, {
+        id: messageId,
+        ...request.body.message,
+        createdAt: "2026-09-16T10:00:00.000Z",
+      });
       response.status(202).json({ interactionId, messageId });
     });
     upstream.get("/v1/interactions/:id", (request, response) => {
@@ -79,10 +83,11 @@ describe("Streamable HTTP MCP integration", () => {
       interactionId: "int-integration",
       messages: [
         {
-          messageId: "msg-integration",
+          id: "msg-integration",
           origin: "integration-agent",
           destination: "agent:bob",
           content: "persist me",
+          createdAt: "2026-09-16T10:00:00.000Z",
           position: "0001",
         },
       ],

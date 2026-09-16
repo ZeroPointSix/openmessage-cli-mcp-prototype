@@ -73,7 +73,13 @@ describe.skipIf(!configured)("real OpenMessage E2E", () => {
     expect(Array.isArray(messages)).toBe(true);
     expect(messages).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ messageId, origin, destination, content }),
+        expect.objectContaining({
+          id: messageId,
+          origin,
+          destination,
+          content,
+          createdAt: expect.any(String),
+        }),
       ]),
     );
   });

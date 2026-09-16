@@ -37,29 +37,78 @@ describe("OpenMessageClient", () => {
     });
   });
 
-  it("composes interaction references into complete messages", async () => {
+  it("preserves POST messageId as the canonical GET message id", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json({ messageId: "msg-1", interactionId: "int-1" }, { status: 202 }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "int-1",
+          messages: [{ messageId: "msg-1", position: "0001" }],
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "msg-1",
+          origin: "test-agent",
+          destination: "agent:bob",
+          content: "persisted hello",
+          createdAt: "2026-09-16T10:00:00.000Z",
+        }),
+      );
+    const client = new OpenMessageClient({
+      baseUrl: "https://openmessage.example",
+      origin: "test-agent",
+      fetch: fetchMock,
+    });
+
+    const sent = await client.send({ destination: "agent:bob", content: "persisted hello" });
+    await expect(client.getInteraction(sent.interactionId)).resolves.toEqual({
+      interactionId: "int-1",
+      messages: [
+        {
+          id: sent.messageId,
+          origin: "test-agent",
+          destination: "agent:bob",
+          content: "persisted hello",
+          createdAt: "2026-09-16T10:00:00.000Z",
+          position: "0001",
+        },
+      ],
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      new URL("https://openmessage.example/v1/messages/msg-1"),
+      { headers: {} },
+    );
+  });
+
+  it("rejects a GET message response that substitutes messageId for canonical id", async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(
         Response.json({
-          interactionId: "int-1",
+          id: "int-1",
           messages: [{ messageId: "msg-1", position: "0001" }],
         }),
       )
-      .mockResolvedValueOnce(Response.json({ messageId: "msg-1", content: "persisted hello" }));
+      .mockResolvedValueOnce(
+        Response.json({
+          messageId: "msg-1",
+          origin: "test-agent",
+          destination: "agent:bob",
+          content: "persisted hello",
+          createdAt: "2026-09-16T10:00:00.000Z",
+        }),
+      );
     const client = new OpenMessageClient({
       baseUrl: "https://openmessage.example",
       fetch: fetchMock,
     });
-    await expect(client.getInteraction("int-1")).resolves.toEqual({
-      interactionId: "int-1",
-      messages: [{ messageId: "msg-1", content: "persisted hello", position: "0001" }],
-    });
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      new URL("https://openmessage.example/v1/messages/msg-1"),
-      { headers: {} },
-    );
+
+    await expect(client.getInteraction("int-1")).rejects.toThrow();
   });
 
   it("maps non-success responses to OpenMessageHttpError", async () => {

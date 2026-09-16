@@ -6,20 +6,29 @@ const sendResponseSchema = z.object({
   accepted: z.boolean().optional(),
 });
 
-const messageSchema = z
+const interactionMessageReferenceSchema = z
   .object({
-    id: z.string().optional(),
-    messageId: z.string().optional(),
-    content: z.unknown().optional(),
+    messageId: z.string().min(1),
     position: z.union([z.string(), z.number()]).optional(),
+    content: z.unknown().optional(),
   })
   .passthrough();
+
+const canonicalMessageSchema = z
+  .object({
+    id: z.string().min(1),
+    origin: z.string().min(1),
+    destination: z.string().min(1),
+    content: z.unknown(),
+    createdAt: z.string().min(1),
+  })
+  .strict();
 
 const interactionSchema = z
   .object({
     interactionId: z.string().optional(),
     id: z.string().optional(),
-    messages: z.array(messageSchema).default([]),
+    messages: z.array(interactionMessageReferenceSchema).default([]),
   })
   .passthrough();
 
@@ -97,15 +106,14 @@ export class OpenMessageClient {
     const messages = await Promise.all(
       interaction.messages.map(async (entry) => {
         if (entry.content !== undefined) return entry;
-        const messageId = entry.messageId ?? entry.id;
-        if (!messageId) return entry;
+        const messageId = entry.messageId;
         const messageResponse = await this.fetchImpl(
           this.url(`/v1/messages/${encodeURIComponent(messageId)}`),
           { headers: this.headers },
         );
-        const message = z
-          .record(z.string(), z.unknown())
-          .parse(await this.readJson(messageResponse, "get message"));
+        const message = canonicalMessageSchema.parse(
+          await this.readJson(messageResponse, "get message"),
+        );
         return entry.position === undefined ? message : { ...message, position: entry.position };
       }),
     );
