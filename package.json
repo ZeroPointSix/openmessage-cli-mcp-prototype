@@ -1,0 +1,13 @@
+{
+  "name": "openmessage-cli-mcp-prototype",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "openmessage": "./src/index.js" },
+  "scripts": { "start": "node src/index.js mcp start", "check": "node --check src/index.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "express": "latest",
+    "zod": "latest"
+  }
+}
