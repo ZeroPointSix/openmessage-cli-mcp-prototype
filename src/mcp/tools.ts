@@ -4,10 +4,11 @@ import type { OpenMessageClient } from "../client/openmessage-client.js";
 
 export const OPENMESSAGE_TOOL_NAMES = ["send_message", "get_interaction"] as const;
 
-function toolResult(value: Record<string, unknown>) {
+function toolResult<T extends object>(value: T) {
+  const structuredContent = { ...value } as Record<string, unknown>;
   return {
-    content: [{ type: "text" as const, text: JSON.stringify(value) }],
-    structuredContent: value,
+    content: [{ type: "text" as const, text: JSON.stringify(structuredContent) }],
+    structuredContent,
   };
 }
 
