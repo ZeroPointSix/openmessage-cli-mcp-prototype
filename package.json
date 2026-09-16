@@ -31,7 +31,7 @@
     "@types/node": "latest",
     "tsup": "latest",
     "tsx": "latest",
-    "typescript": "latest",
+    "typescript": "^6.0.0",
     "vitest": "latest"
   },
   "license": "MIT"
