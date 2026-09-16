@@ -1,13 +1,38 @@
 {
-  "name": "openmessage-cli-mcp-prototype",
-  "version": "0.1.0",
+  "name": "openmessage",
+  "version": "0.2.0",
+  "description": "Official OpenMessage CLI and Streamable HTTP MCP client",
   "type": "module",
-  "bin": { "openmessage": "./src/index.js" },
-  "scripts": { "start": "node src/index.js mcp start", "check": "node --check src/index.js" },
-  "engines": { "node": ">=20" },
+  "bin": { "openmessage": "./dist/cli.js" },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "vitest run test/e2e",
+    "smoke": "node scripts/smoke.mjs",
+    "pack:verify": "node scripts/verify-package.mjs",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm smoke && pnpm pack:verify"
+  },
+  "engines": { "node": ">=24" },
+  "packageManager": "pnpm@11.16.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",
+    "commander": "latest",
     "express": "latest",
-    "zod": "latest"
-  }
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "tsup": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  },
+  "license": "MIT"
 }
