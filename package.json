@@ -3,8 +3,13 @@
   "version": "0.2.0",
   "description": "Official OpenMessage CLI and Streamable HTTP MCP client",
   "type": "module",
-  "bin": { "openmessage": "./dist/cli.js" },
-  "files": ["dist", "README.md"],
+  "bin": {
+    "openmessage": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
@@ -17,7 +22,9 @@
     "pack:verify": "node scripts/verify-package.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm smoke && pnpm pack:verify"
   },
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "packageManager": "pnpm@11.16.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",

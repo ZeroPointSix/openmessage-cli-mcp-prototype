@@ -1,7 +1,7 @@
+import type { Server } from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import express from "express";
-import type { Server } from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
 import { OpenMessageClient } from "../../src/client/openmessage-client.js";
 import { startMcpHttpServer } from "../../src/mcp/server.js";
@@ -61,10 +61,7 @@ describe("Streamable HTTP MCP", () => {
     closeCallbacks.push(async () => client.close());
 
     const toolList = await client.listTools();
-    expect(toolList.tools.map((tool) => tool.name)).toEqual([
-      "send_message",
-      "get_interaction",
-    ]);
+    expect(toolList.tools.map((tool) => tool.name)).toEqual(["send_message", "get_interaction"]);
     const sent = await client.callTool({
       name: "send_message",
       arguments: { destination: "agent:bob", content: "persist me" },

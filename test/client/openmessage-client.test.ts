@@ -3,9 +3,11 @@ import { OpenMessageClient, OpenMessageHttpError } from "../../src/client/openme
 
 describe("OpenMessageClient", () => {
   it("maps send arguments to the HTTP contract and reports accepted, not delivered", async () => {
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
-      Response.json({ messageId: "msg-1", interactionId: "int-1" }, { status: 202 }),
-    );
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        Response.json({ messageId: "msg-1", interactionId: "int-1" }, { status: 202 }),
+      );
     const client = new OpenMessageClient({
       baseUrl: "https://openmessage.example/",
       apiKey: "upstream-token",
@@ -63,9 +65,9 @@ describe("OpenMessageClient", () => {
   it("maps non-success responses to OpenMessageHttpError", async () => {
     const client = new OpenMessageClient({
       baseUrl: "https://openmessage.example",
-      fetch: vi.fn<typeof fetch>().mockResolvedValue(
-        new Response('{"error":"denied"}', { status: 403 }),
-      ),
+      fetch: vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(new Response('{"error":"denied"}', { status: 403 })),
     });
     const error = await client.getInteraction("int-denied").catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(OpenMessageHttpError);
