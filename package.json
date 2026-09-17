@@ -1,13 +1,46 @@
 {
-  "name": "openmessage-cli-mcp-prototype",
-  "version": "0.1.0",
+  "name": "openmessage",
+  "version": "0.2.1",
+  "description": "Official OpenMessage CLI and Streamable HTTP MCP client",
   "type": "module",
-  "bin": { "openmessage": "./src/index.js" },
-  "scripts": { "start": "node src/index.js mcp start", "check": "node --check src/index.js" },
-  "engines": { "node": ">=20" },
+  "bin": {
+    "openmessage": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run test/integration",
+    "test:e2e:real": "vitest run test/e2e/real-openmessage.test.ts",
+    "smoke": "node scripts/smoke.mjs",
+    "pack:verify": "node scripts/verify-package.mjs",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm smoke && pnpm pack:verify"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.16.0",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "latest",
-    "express": "latest",
-    "zod": "latest"
-  }
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "commander": "^15.0.0",
+    "express": "^5.2.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.5.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.0",
+    "vitest": "^5.0.1"
+  },
+  "license": "MIT"
 }
